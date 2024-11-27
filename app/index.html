@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>TETR.IO</title>
+	<style>
+		@font-face {
+			font-family: 'C';
+			font-weight: 500;
+			src: url('./assets/cr.ttf');
+		}
+		@font-face {
+			font-family: 'C';
+			font-weight: 900;
+			src: url('./assets/cb.ttf');
+		}
+
+		html {
+			background: #000000;
+			-moz-user-select: none !important;
+			-khtml-user-select: none !important;
+			-webkit-user-select: none !important;
+			-ms-user-select: none !important;
+			user-select: none !important;
+			font-family: 'C';
+		}
+
+		#bg {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #111;
+			z-index: -10;
+			animation: 0.5s BGIn forwards;
+		}
+		@keyframes BGIn {
+			from { opacity: 0; }
+			to { opacity: 1; }
+		}
+
+		#shade {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #000;
+			z-index: 10;
+			opacity: 0;
+			transition: 0.3s opacity;
+			pointer-events: none;
+		}
+		#shade.showing {
+			opacity: 1;
+			pointer-events: all;
+		}
+
+		#logo {
+			position: fixed;
+			left: 50vw;
+			top: 50vh;
+			height: 5vw;
+			opacity: 0.5;
+			pointer-events: none;
+			transform: translate(-50%, -50%) perspective(300px) rotate3d(0, 0, 0, 90deg);
+			transform-origin: 50% 50% -3vw;
+			transition: 0.3s transform cubic-bezier(.4,.1,.87,.56);
+			animation: 1s bob ease-in-out alternate infinite;
+			backface-visibility: hidden;
+		}
+
+		#logo.hidden {
+			transition: 0.1s transform ease-in;
+		}
+
+		#logo.hidden {
+			transform: translate(-50%, -50%) perspective(300px) rotate3d(1, 0, 0, 90deg);
+		}
+
+		@keyframes bob {
+			from {
+				opacity: 1;
+			}
+			to {
+				opacity: 0.5;
+			}
+		}
+
+		#loader {
+			color: #444;
+			position: fixed;
+			left: 0;
+			right: 0;
+			top: calc(50vh + 4vw);
+			text-align: center;
+			font-weight: 500;
+			font-size: 1.25em;
+			pointer-events: none;
+			margin: 0;
+		}
+
+		#loader .sub {
+			font-size: 0.75em;
+		}
+
+		#loader #progressbar {
+			--progress: 0;
+			position: fixed;
+			left: calc(50vw - 10em);
+			right: calc(50vw - 10em);
+			top: calc(50vh + 4vw + 1.5em);
+			height: 3px;
+			background: #333;
+		}
+		#loader #progressbar::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: #CCC;
+			transform-origin: left;
+			transform: scaleX(var(--progress));
+		}
+
+		#version {
+			color: #222;
+			position: fixed;
+			left: 0.5em;
+			top: 0.5em;
+			font-weight: 500;
+			font-size: 4em;
+			pointer-events: none;
+			margin: 0;
+			font-weight: 900;
+		}
+
+		.dialog {
+			position: fixed;
+			left: 50vw;
+			top: 50vh;
+			max-height: 95vh;
+			overflow-y: auto;
+			background: #111;
+			padding: 1.5em;
+			width: 35em;
+			max-width: 90vw;
+			transform: translate(-50%, -50%);
+			color: #AAA;
+			border-radius: 3px;
+			box-shadow: 0px 4px 8px #000A;
+			transition: 0.3s opacity ease-out, 0.3s transform ease-out;
+		}
+
+		.dialog.hidden {
+			pointer-events: none;
+			opacity: 0;
+			transform: translate(-50%, calc(-50% + 5vh));
+		}
+
+		#do_update_url {
+			color: #CCC;
+			font-weight: 900;
+			text-decoration: underline dotted;
+			transition: 0.3s color;
+			cursor: pointer;
+		}
+		#do_update_url:hover {
+			color: #FFF;
+		}
+
+		.dialog h1 {
+			background: repeating-linear-gradient(-45deg, #25498C 0px, #25498C 5px, #1B2B48 5px, #1B2B48 10px);
+			margin: -0.75em;
+			margin-bottom: 0.5em;
+			font-size: 2em;
+			color: #FFF;
+			padding: 0.3em 0.75em;
+			text-align: center;
+			text-shadow: 0px 2px 4px #0008;
+		}
+		#required_update.dialog h1 {
+			background: repeating-linear-gradient(-45deg, #8C2525 0px, #8C2525 5px, #481B1B 5px, #481B1B 10px);
+		}
+
+		.dialog h2 {
+			text-align: center;
+			font-size: 4em;
+			color: #444;
+			margin: 0 -0.375em;
+			font-weight: 500;
+			background: #0A0A0A;
+			padding: 0;
+			padding-bottom: 0.1em;
+		}
+
+		.dialog h2 span:nth-child(1) {
+			font-weight: 900;
+			color: #FE3636;
+		}
+		.dialog h2 span:nth-child(2) {
+			font-weight: 900;
+			color: #6EFE36;
+		}
+
+		.dialog .buttons {
+			margin: -1.5em;
+			margin-top: 0.75em;
+			padding: 0.75em;
+			border-top: 1px solid #0A0A0A;
+		}
+
+		.dialog .button {
+			display: inline-block;
+			cursor: pointer;
+			background: #0A0A0A;
+			padding: 0.2em 0.75em;
+			margin-bottom: -0.5em;
+			border-radius: 3px;
+			box-shadow: 0px 2px 4px #000A;
+			color: #DDD;
+			text-shadow: 0px 2px 4px #0008;
+			font-size: 1.35em;
+			font-weight: 900;
+			transform: translateY(0);
+			filter: brightness(1);
+			transition: 0.3s transform, 0.3s filter;
+		}
+
+		.dialog .button.pri {
+			background: repeating-linear-gradient(-45deg, #25498C 0px, #25498C 5px, #1B2B48 5px, #1B2B48 10px);
+			color: #FFF;
+			float: right;
+		}
+		.dialog .button.sec {
+			background: repeating-linear-gradient(-45deg, #8C2525 0px, #8C2525 5px, #481B1B 5px, #481B1B 10px);
+			color: #FFF;
+			float: right;
+		}
+
+		.dialog .button:hover {
+			filter: brightness(1.3);
+			transform: translateY(-2px);
+		}
+
+		.dialog .button:active {
+			filter: brightness(1.8);
+			transform: translateY(3px);
+			transition: 0.05s transform, 0.05s filter;
+		}
+
+		.dialog .button.hidden {
+			visibility: hidden;
+			pointer-events: none;
+		}
+
+		#emergency {
+			color: #FFF;
+			background: #F22;
+			display: inline-block;
+			border-radius: 3px;
+			padding: 0.2em 1em;
+			font-size: 1.2em;
+		}
+	</style>
+	<script>
+		const xhr = {
+			send: (method, url) => {
+				return new Promise((resolve, reject) => {
+					const request = new XMLHttpRequest();
+					request.open(method, url, true);
+
+					request.timeout = 10000;
+
+					request.onload = () => {
+						if (request.readyState === 4) {
+							try {
+								const json = JSON.parse(request.responseText);
+								resolve(json);
+							} catch (ex) {
+								reject();
+							}
+						}
+					};
+					request.onerror = () => {
+						reject();
+					};
+					request.ontimeout = () => {
+						reject();
+					};
+
+					request.send();
+				});
+			},
+			get: (url) => {
+				return xhr.send('GET', url);
+			}
+		};
+
+		let updateLevel = '';
+
+		function StartLoader() {
+			document.getElementById('version').innerHTML = `${ window.EMERGENCY_MODE ? '<span id="emergency">SAFE MODE</span>' : '' }v${ window.CLIENT_VERSION }`;
+			document.getElementById('loader').innerHTML = 'CHECKING FOR UPDATES';
+
+			xhr.get(`${ window.UPDATER_ADDRESS }?nc=${ Date.now() }`).then((result) => {
+				if (result.recommended == undefined) {
+					document.getElementById('loader').innerHTML = 'FAILED TO CHECK FOR UPDATES';
+					FinalizeLoader(true);
+					return;
+				}
+
+				try {
+					if (result.recommended <= window.CLIENT_VERSION) {
+						document.getElementById('loader').innerHTML = '';
+						FinalizeLoader();
+					} else {
+						document.getElementById('loader').innerHTML = 'UPDATE AVAILABLE';
+						if (result.required > window.CLIENT_VERSION) {
+							document.getElementById('required_update_target').innerHTML = `<span>v${ window.CLIENT_VERSION }</span> ➔ <span>v${ result.latest }</span>`;
+							updateLevel = 'required';
+						} else {
+							document.getElementById('recommended_update_target').innerHTML = `<span>v${ window.CLIENT_VERSION }</span> ➔ <span>v${ result.latest }</span>`;
+							updateLevel = 'recommended';
+						}
+						window.IPC.send('try-update', result.latest);
+					}
+				} catch (ex) {
+					document.getElementById('loader').innerHTML = 'FAILED TO CHECK FOR UPDATES';
+					FinalizeLoader(true);
+				}
+			}, (result) => {
+				document.getElementById('loader').innerHTML = 'FAILED TO CHECK FOR UPDATES';
+				FinalizeLoader(true);
+			});
+
+			// Actions
+			document.getElementById('ignore_recommended_update').addEventListener('click', () => {
+				document.getElementById('loader').innerHTML = 'UPDATE IGNORED';
+				document.getElementById('recommended_update').classList.add('hidden');
+				FinalizeLoader(true);
+			}, false);
+
+			document.getElementById('ignore_required_update').addEventListener('click', () => {
+				document.getElementById('loader').innerHTML = 'NO MATTER WHAT HAPPENS, IT WON\'T BE OSK\'S FAULT!';
+				document.getElementById('required_update').classList.add('hidden');
+				FinalizeLoader(true);
+			}, false);
+
+			document.getElementById('do_recommended_update').addEventListener('click', () => {
+				DoUpdate();
+			}, false);
+			document.getElementById('do_required_update').addEventListener('click', () => {
+				DoUpdate();
+			}, false);
+
+			let secretString = '';
+			document.body.addEventListener('keydown', (e) => {
+				secretString += e.key.toLowerCase();
+				secretString = secretString.substring(secretString.length - 10);
+
+				if (secretString === 'justtellme') {
+					document.getElementById('ignore_required_update').classList.remove('hidden');
+				}
+			}, false);
+		}
+
+		function FinalizeLoader(slow = false) {
+			setTimeout(() => {
+				document.getElementById('shade').classList.add('showing');
+				document.getElementById('logo').classList.add('hidden');
+			}, slow ? 1700 : 0);
+
+			setTimeout(() => {
+				window.location = window.TARGET_ADDRESS;
+			}, slow ? 2000 : 300);
+		}
+
+		function DoUpdate() {
+			document.getElementById('loader').innerHTML = '';
+			document.getElementById('recommended_update').classList.add('hidden');
+			document.getElementById('required_update').classList.add('hidden');
+			document.getElementById('do_update').classList.remove('hidden');
+			window.location = window.UPDATER_SITE;
+
+			document.getElementById('do_update_url').addEventListener('click', () => {
+				window.location = window.UPDATER_SITE;
+			}, false);
+		}
+
+		window.IPC.on('updater-dl-status', (e, dat) => {
+			const percentage = (dat.current / dat.total) * 100;
+			document.getElementById('loader').innerHTML = `DOWNLOADING UPDATE... ${percentage.toFixed(2)}%<div id="progressbar" style="--progress: ${percentage/100};"></div>`;
+		});
+		window.IPC.on('updater-dl-error', () => {
+			document.getElementById('loader').innerHTML = 'UPDATE AVAILABLE';
+			document.getElementById('required_update').classList.remove('hidden');
+		});
+		window.IPC.on('updater-dl-verifying', () => {
+			document.getElementById('loader').innerHTML = 'VERIFYING UPDATE...';
+		});
+		window.IPC.on('updater-dl-complete', () => {
+			document.getElementById('loader').innerHTML = 'INSTALLING UPDATE...';
+		});
+	</script>
+</head>
+<body>
+	<div id="bg"></div>
+	<img id="logo" src="./assets/osk.svg" />
+	<h1 id="loader">LOADING</h1>
+	<h1 id="version"></h1>
+	<div id="shade"></div>
+
+	<div id="recommended_update" class="dialog hidden">
+		<h1>RECOMMENDED UPDATE AVAILABLE</h1>
+		<p>A recommended update for <b>TETR.IO Desktop</b> is available.</p>
+		<h2 id="recommended_update_target"></h2>
+		<p>Update at your earliest convenience by pressing UPDATE NOW.</p>
+		<div class="buttons">
+			<div class="button" id="ignore_recommended_update">LATER</div>
+			<div class="button pri" id="do_recommended_update">UPDATE NOW</div>
+		</div>
+	</div>
+
+	<div id="required_update" class="dialog hidden">
+		<h1>REQUIRED UPDATE AVAILABLE</h1>
+		<p>A required update for <b>TETR.IO Desktop</b> is available.</p>
+		<h2 id="required_update_target"></h2>
+		<p><b>Your current version is no longer supported.</b> You must update by pressing UPDATE NOW.</p>
+		<div class="buttons">
+			<div class="button hidden" id="ignore_required_update">LATER</div>
+			<div class="button sec" id="do_required_update">UPDATE NOW</div>
+		</div>
+	</div>
+
+	<div id="do_update" class="dialog hidden">
+		<p>Your browser should be opening <span id="do_update_url">the download page</span>. Download the new version of <b>TETR.IO Desktop</b>, then run it.</p>
+	</div>
+</body>
+</html>

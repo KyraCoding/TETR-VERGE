@@ -1,0 +1,6 @@
+{
+	"target": "https://tetr.io/",
+	"updater_target": "https://tetr.io/about/desktop/releases.json",
+	"updater_site": "https://tetr.io/about/desktop/?from=updater",
+	"discord_client_id": null
+}

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>TETR.IO</title>
+	<style>
+		@font-face {
+			font-family: 'C';
+			font-weight: 500;
+			src: url('./assets/cr.ttf');
+		}
+		@font-face {
+			font-family: 'C';
+			font-weight: 900;
+			src: url('./assets/cb.ttf');
+		}
+
+		html {
+			background: #000000;
+			-moz-user-select: none !important;
+			-khtml-user-select: none !important;
+			-webkit-user-select: none !important;
+			-ms-user-select: none !important;
+			user-select: none !important;
+			font-family: 'C';
+		}
+
+		#bg {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #111;
+			z-index: -10;
+			animation: 0.5s BGIn forwards;
+		}
+		@keyframes BGIn {
+			from { opacity: 0; }
+			to { opacity: 1; }
+		}
+
+		#shade {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #000;
+			z-index: 10;
+			opacity: 0;
+			transition: 0.3s opacity;
+			pointer-events: none;
+		}
+		#shade.showing {
+			opacity: 1;
+			pointer-events: all;
+		}
+
+		#main {
+			position: fixed;
+			top: 50vh;
+			left: 50vw;
+			width: 44rem;
+			padding-left: 15rem;
+			max-width: 95vw;
+			box-sizing: border-box;
+			color: #888;
+			transform: perspective(600px) translate3d(-50%, -50%, -15rem) rotate3d(0, 0, 0, 90deg);
+			transform-origin: 50% 50% -15rem;
+			animation: 0.5s MainAppear cubic-bezier(.3,1.48,.7,.99);
+		}
+		@keyframes MainAppear {
+			from { opacity: 0; transform: perspective(600px) translate3d(-50%, -50%, -15rem) rotate3d(-1, 0, 0, 90deg); }
+			to { opacity: 1; transform: perspective(600px) translate3d(-50%, -50%, -15rem) rotate3d(0, 0, 0, 90deg); }
+		}
+		@keyframes MainHide {
+			from { opacity: 1; transform: perspective(600px) translate3d(-50%, -50%, -15rem) rotate3d(0, 0, 0, 90deg); }
+			to { opacity: 0; transform: perspective(600px) translate3d(-50%, -50%, -15rem) rotate3d(1, 0, 0, 90deg); }
+		}
+		#main.hidden {
+			pointer-events: none;
+			animation: 0.3s MainHide cubic-bezier(.24,-0.26,.88,.42) forwards;
+		}
+
+		#kagarin {
+			width: 12rem;
+			position: absolute;
+			top: 0;
+			left: 0;
+			opacity: 0.6;
+			pointer-events: none;
+		}
+
+		#main h1 {
+			font-size: 3rem;
+			margin: 0;
+		}
+
+		#main h2 {
+			font-size: 1.25rem;
+			margin: 0;
+		}
+
+		#main ul {
+			margin: 1rem 0;
+		}
+
+		#main li {
+			margin: 0.25rem 0;
+		}
+
+		#main .button {
+			display: inline-block;
+			padding: 0.5rem 1rem;
+			padding-top: 0.4rem;
+			background-color: #111;
+			border: 1px solid #888;
+			border-radius: 3px;
+			color: #888;
+			cursor: pointer;
+			margin-right: 0.5rem;
+			transform: translateY(0px);
+			transition: 0.3s color, 0.3s background-color, 0.3s border-color, 0.3s transform;
+		}
+		#main .button:hover {
+			background-color: #333;
+			border-color: #FFF;
+			color: #FFF;
+			transform: translateY(-1px);
+		}
+		#main .button:active {
+			background-color: #FFF;
+			border-color: #FFF;
+			color: #000;
+			transform: translateY(2px);
+			transition: 0.05s color, 0.05s background-color, 0.05s border-color, 0.05s transform;
+		}
+
+		#main a {
+			color: #FFF;
+			font-weight: 900;
+		}
+	</style>
+	<script>
+		function ErrorLoader(code, description) {
+			document.getElementById('main').classList.add('shown');
+			document.getElementById('err').textContent = `E${ Math.abs(code || 0) } ${ description || 'ERR_UNKNOWN_ERROR' }`;
+			document.getElementById('ver').textContent = window.CLIENT_VERSION;
+
+			document.getElementById('retry').addEventListener('click', (e) => {
+				document.getElementById('shade').classList.add('showing');
+				document.getElementById('main').classList.add('hidden');
+
+				setTimeout(() => {
+					window.location = window.TARGET_ADDRESS;
+				}, 300);
+			});
+		}
+	</script>
+</head>
+<body>
+	<div id="bg"></div>
+	<div id="shade"></div>
+	<div id="main">
+		<img id="kagarin" src="./assets/error.png" />
+		<h1>Connection error</h1>
+		<h2 id="err">E0 ERR_UNKNOWN_ERROR</h2>
+		<ul>
+			<li>Check your network connection</li>
+			<li>Make sure TETR.IO isn't blocked by any firewalls</li>
+			<li>Ensure you've logged into your WiFi connection, if applicable</li>
+			<li>Check the <a href="https://status.osk.sh/">status page</a></li>
+			<li>Try again later</li>
+		</ul>
+		<p>TETR.IO Desktop v<span id="ver">?</span></p>
+		<div class="button" id="retry">Try again</div>
+	</div>
+</body>
+</html>

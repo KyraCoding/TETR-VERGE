@@ -1,0 +1,8 @@
+{
+    "name": "tetr-verge",
+    "version": "0.0.2",
+    "description": "A powerful TETR.IO analytics engine.",
+    "scripts": {
+        "build": "asar pack app app.asar && move app.asar %LocalAppData%\\Programs\\tetrio-desktop\\resources\\app.asar && echo app.asar built and installed succesfully! || del app.asar && echo Failed to build/install app.asar! (Did you quit TETR.IO first?)"
+    }
+}

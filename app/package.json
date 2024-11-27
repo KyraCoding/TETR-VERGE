@@ -1,0 +1,18 @@
+{
+  "name": "tetrio-desktop",
+  "version": "9.0.0",
+  "author": {
+    "name": "osk",
+    "email": "me@osk.sh"
+  },
+  "license": "© osk 2019-2024. All Rights Reserved.",
+  "homepage": "https://tetr.io/",
+  "main": "main.js",
+  "description": "Puzzle together in this modern yet familiar online stacker!",
+  "dependencies": {
+    "discord-rich-presence": "0.0.8",
+    "electron-store": "^8.1.0",
+    "openpgp": "^5.11.1",
+    "systeminformation": "^5.22.0"
+  }
+}

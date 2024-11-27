@@ -1,8 +1,0 @@
-{
-  "version": "0.0.2",
-  "version_nickname": "QoL Update #1",
-  "desktop_update_url": "https://github.com/MrMeCoding/TETR-VERGE/raw/main/v0.0.2/VERGE-Desktop/app.asar",
-  "desktoptplus_update_url": "https://github.com/MrMeCoding/TETR-VERGE/raw/main/v0.0.2/VERGE-TPLUS-Desktop/app.asar",
-  "browser_update_url": "https://github.com/MrMeCoding/TETR-VERGE/raw/main/v0.0.2/VERGE-Browser/preload.js",
-  "patchnotes_url": "github.com/MrMeCoding/TETR-VERGE/releases/latest"
-}
